@@ -42,9 +42,9 @@ function av_afterIncludeReady() {
       links.style.top = '64px';
       links.style.left = '0';
       links.style.right = '0';
-      links.style.background = '#0b1220';
+      links.style.background = '#0a0b0f';
       links.style.padding = '10px 24px 18px';
-      links.style.borderBottom = '1px solid #1e2b47';
+      links.style.borderBottom = '1px solid #24262e';
     });
   }
 
@@ -54,6 +54,40 @@ function av_afterIncludeReady() {
 
   // Odśwież stan "połączono z Discord" wszędzie tam gdzie jest widoczny w navbarze
   av_reflectDiscordConnection();
+
+  // Baner o plikach cookie / localStorage (niezbędne, techniczne)
+  av_initCookieBanner();
+}
+
+// ===== Baner cookie (informacja o niezbędnych plikach cookie / localStorage) =====
+
+const AV_COOKIE_CONSENT_KEY = 'apollonhub_cookie_consent';
+
+function av_initCookieBanner() {
+  try {
+    if (localStorage.getItem(AV_COOKIE_CONSENT_KEY) === '1') return;
+  } catch (e) {
+    return; // brak dostępu do localStorage — nie pokazujemy banera
+  }
+  if (document.querySelector('.cookie-banner')) return;
+
+  const bar = document.createElement('div');
+  bar.className = 'cookie-banner';
+  bar.innerHTML =
+    '<p>Ta strona korzysta wyłącznie z niezbędnych plików cookie / localStorage — do zapamiętania ' +
+    'sesji Twojego konta Discord oraz lokalnego zapisu licencji demo w Twojej przeglądarce. ' +
+    'Nie używamy cookies reklamowych ani analitycznych. Szczegóły w ' +
+    '<a href="regulamin.html#cookies" style="color:var(--accent-2);font-weight:700;">Regulaminie</a>.</p>' +
+    '<button class="btn btn-primary" id="cookieAcceptBtn">Rozumiem</button>';
+  document.body.appendChild(bar);
+
+  const btn = document.getElementById('cookieAcceptBtn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      try { localStorage.setItem(AV_COOKIE_CONSENT_KEY, '1'); } catch (e) {}
+      bar.remove();
+    });
+  }
 }
 
 // ===== Wspólne dane o powiązanym koncie Discord (localStorage, po stronie klienta) =====
