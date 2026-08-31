@@ -1,47 +1,54 @@
 // ===== Apollon Studio — status botów Discord =====
 //
-// Ten skrypt umie pobierać status botów NA ŻYWO z publicznego "Widżetu serwera" Discorda
+// Ten skrypt pobiera status botów NA ŻYWO z publicznego "Widżetu serwera" Discorda
 // (Discord Server Widget) — bez potrzeby własnego backendu.
 //
-// Jak to włączyć (2 minuty):
-// 1. Discord → Ustawienia serwera → Widżet → włącz "Włącz widżet serwera".
-// 2. Skopiuj "ID serwera" (włącz Tryb dewelopera w Ustawieniach Discorda → PPM na nazwę
-//    serwera → Kopiuj ID serwera) i wklej je poniżej jako AV_GUILD_ID.
-// 3. Dla każdego bota w tablicy AV_BOTS wklej jego ID (PPM na bota na liście członków → Kopiuj ID)
-//    w polu "discordId".
+// WAŻNE ograniczenie widżetu Discorda: publiczne API widżetu NIE zwraca prawdziwych ID
+// użytkowników (ze względów prywatności zamienia je na uproszczone "0", "1", "2"...).
+// Zwraca za to ich NAZWĘ UŻYTKOWNIKA (username) — dlatego dopasowanie botów w tym pliku
+// działa po polu "widgetUsername", a nie po ID. Jeśli kiedyś zmienisz nazwę użytkownika
+// (username) bota na Discordzie, zaktualizuj też wartość "widgetUsername" poniżej.
 //
-// Dopóki AV_GUILD_ID lub dany "discordId" nie zostaną uzupełnione, karta bota pokaże
+// Jak to skonfigurować:
+// 1. Discord → Ustawienia serwera → Widżet → włącz "Włącz widżet serwera" (na serwerze,
+//    na którym faktycznie działają boty).
+// 2. Skopiuj "ID serwera" (Tryb dewelopera → PPM na nazwę serwera → Kopiuj ID serwera)
+//    i wklej poniżej jako AV_GUILD_ID.
+// 3. Dla każdego bota wpisz jego dokładną nazwę użytkownika (username, nie nick na serwerze)
+//    w polu "widgetUsername".
+//
+// Dopóki AV_GUILD_ID nie jest uzupełnione albo widżet jest wyłączony, karta bota pokaże
 // "Status nieznany" zamiast zgadywać — to celowe, żeby nie pokazywać fałszywych informacji.
 //
 // Ograniczenie: publiczny widżet Discorda pokazuje tylko AKTUALNIE ONLINE członków serwera
 // (limit ok. 100 osób). Jeśli Twój serwer jest bardzo duży, bot może nie pojawić się na liście
 // mimo że działa — w praktyce dla botów (które są online 24/7) to rzadki przypadek.
 
-const AV_GUILD_ID = 'WPISZ_TU_ID_SERWERA';
+const AV_GUILD_ID = '1489354594562740324';
 
 const AV_BOTS = [
   {
-    id: 'status-serwera',
-    discordId: 'WPISZ_ID_BOTA_STATUS',
-    name: 'Apollon — Status Serwera',
-    desc: 'Publikuje na kanale Discord status Twojego serwera Roblox w czasie rzeczywistym.',
-    invite: '#',
+    id: 'api',
+    widgetUsername: 'Apollon API',
+    name: 'Apollon API',
+    desc: 'Weryfikacja konta Roblox i Discord oraz sprawdzanie banów na Roblox.',
+    invite: 'https://discord.gg/FjP3PnDGJQ',
     critical: false
   },
   {
     id: 'licencje',
-    discordId: 'WPISZ_ID_BOTA_LICENCJE',
-    name: 'Apollon — Licencje',
-    desc: 'Weryfikuje konto Discord i aktywuje zakupione klucze licencyjne modeli oraz skryptów.',
-    invite: '#',
+    widgetUsername: 'licencje',
+    name: 'Apollon Licencje',
+    desc: 'Weryfikuje konto Discord i aktywuje zakupione klucze licencyjne produktów.',
+    invite: 'https://discord.gg/FjP3PnDGJQ',
     critical: true
   },
   {
-    id: 'wsparcie',
-    discordId: 'WPISZ_ID_BOTA_WSPARCIE',
-    name: 'Apollon — Wsparcie',
-    desc: 'Obsługuje zgłoszenia pomocy technicznej i zarządza kanałami wsparcia na serwerze.',
-    invite: '#',
+    id: 'radio',
+    widgetUsername: 'radio',
+    name: 'Apollon Roblox Radio',
+    desc: 'Obsługuje system radia Roblox na serwerze.',
+    invite: 'https://discord.gg/FjP3PnDGJQ',
     critical: false
   }
 ];
@@ -65,7 +72,11 @@ function av_statusLabel(status) {
 
 function av_renderBotCards(container) {
   container.innerHTML = AV_BOTS.map(bot => {
-    const initials = bot.name.replace('Apollon —', '').trim().slice(0, 2).toUpperCase();
+    const rest = bot.name.replace(/^Apollon\s*/i, '').trim();
+    const words = rest.split(/\s+/).filter(Boolean);
+    const initials = words.length > 1
+      ? (words[0][0] + words[1][0]).toUpperCase()
+      : rest.slice(0, 2).toUpperCase();
     return `
       <div class="card">
         <div class="card-body">
@@ -100,8 +111,8 @@ async function av_initBotStatus() {
 
   AV_BOTS.forEach(bot => {
     let status = 'unknown';
-    if (widget && bot.discordId && !bot.discordId.startsWith('WPISZ')) {
-      const member = (widget.members || []).find(m => m.id === bot.discordId);
+    if (widget && bot.widgetUsername) {
+      const member = (widget.members || []).find(m => m.username === bot.widgetUsername);
       status = member ? 'online' : 'offline';
     }
     const label = av_statusLabel(status);
