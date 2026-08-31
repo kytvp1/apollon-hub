@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moje licencje — Apollon Hub API</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="licencje">
+
+<div id="site-header-slot"></div>
+
+<main>
+  <section class="section" style="padding-top:60px;">
+    <div class="container" style="max-width:900px;">
+
+      <div class="section-head" style="margin-bottom:40px;">
+        <div class="tag">Twoje konto</div>
+        <h2>Moje licencje</h2>
+        <p>Aktywuj klucz otrzymany po zakupie — zostanie przypisany do Twojego połączonego konta Discord.</p>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin-top:0;">Aktywuj nową licencję</h3>
+        <form id="addLicenseForm">
+          <div class="field">
+            <label for="licenseModel">Nazwa modelu / produktu</label>
+            <input type="text" id="licenseModel" placeholder="np. Mapa Miasta — City Map" required>
+          </div>
+          <div class="field">
+            <label for="licenseKey">Klucz licencyjny</label>
+            <input type="text" id="licenseKey" placeholder="AHUB-XXXX-XXXX-XXXX" required>
+            <div class="hint">Format: AHUB-XXXX-XXXX-XXXX — klucz otrzymujesz po zakupie na Discordzie.</div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Aktywuj licencję</button>
+          <div class="status-msg" id="licenseStatusMsg"></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin-top:0;">Twoje aktywne licencje</h3>
+        <div style="overflow-x:auto;">
+          <table class="licenses">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Klucz</th>
+                <th>Status</th>
+                <th>Dodano</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="licensesTableBody"></tbody>
+          </table>
+        </div>
+        <p id="licensesEmpty" style="color:var(--text-muted);font-size:13.5px;text-align:center;padding:20px 0;">
+          Nie masz jeszcze żadnych aktywowanych licencji.
+        </p>
+      </div>
+
+      <p style="color:var(--text-muted);font-size:12.5px;text-align:center;">
+        Uwaga: to jest interfejs demonstracyjny działający lokalnie w Twojej przeglądarce.
+        Do prawdziwej weryfikacji kluczy i trwałego zapisu licencji potrzebny jest backend —
+        patrz komentarz w pliku <code>assets/licenses.js</code>.
+      </p>
+
+    </div>
+  </section>
+</main>
+
+<div id="site-footer-slot"></div>
+
+<script src="assets/include.js"></script>
+<script src="assets/licenses.js"></script>
+</body>
+</html>

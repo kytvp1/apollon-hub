@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konto Discord — Apollon Hub API</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="konto">
+
+<div id="site-header-slot"></div>
+
+<main>
+  <section class="section" style="padding-top:60px;">
+    <div class="container" style="max-width:640px;">
+
+      <div class="section-head" style="margin-bottom:40px;">
+        <div class="tag">Konto</div>
+        <h2>Połącz konto Discord</h2>
+        <p>To jedyny sposób identyfikacji w systemie — Twoje licencje są przypisywane do Discord ID, nie do e-maila czy hasła.</p>
+      </div>
+
+      <div class="panel" id="discordAccountBox">
+        <!-- Wypełniane dynamicznie przez assets/discord-auth.js -->
+      </div>
+
+      <div class="panel">
+        <h3 style="margin-top:0;">Dlaczego Discord?</h3>
+        <p style="color:var(--text-muted);font-size:14px;line-height:1.7;">
+          Nie prowadzimy osobnego systemu kont i haseł — logowanie przez Discord (OAuth2)
+          jest bezpieczniejsze i wygodniejsze. Nie widzimy ani nie przechowujemy Twojego hasła
+          do Discorda — otrzymujemy tylko podstawowe dane profilu (nazwę użytkownika, ID, awatar).
+        </p>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<div id="site-footer-slot"></div>
+
+<script src="assets/include.js"></script>
+<script src="assets/discord-auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regulamin — Apollon Hub API</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="regulamin">
+
+<div id="site-header-slot"></div>
+
+<main>
+  <section class="section" style="padding-top:60px;">
+    <div class="container" style="max-width:760px;">
+
+      <div class="section-head" style="margin-bottom:40px;text-align:left;max-width:100%;">
+        <div class="tag">Dokument prawny</div>
+        <h2>Regulamin</h2>
+        <p>Ostatnia aktualizacja: <span id="regDate"></span> — prosimy o zapoznanie się przed zakupem.</p>
+      </div>
+
+      <div class="panel legal">
+
+        <h2>1. Postanowienia ogólne</h2>
+        <p>Niniejszy regulamin określa zasady korzystania z usług Apollon Hub API, w tym zakupu
+        i licencjonowania modeli oraz skryptów przeznaczonych do platformy Roblox. Korzystając
+        z naszych produktów, akceptujesz poniższe warunki.</p>
+
+        <h2>2. Licencja</h2>
+        <ul>
+          <li>Zakupiona licencja jest przypisana do Twojego konta Discord (Discord ID) i ma charakter niewyłączny oraz nieprzenoszalny.</li>
+          <li>Zabronione jest odsprzedawanie, udostępnianie lub publikowanie zakupionych modeli i skryptów poza własnym projektem.</li>
+          <li>Naruszenie warunków licencji skutkuje jej natychmiastowym cofnięciem bez zwrotu kosztów.</li>
+        </ul>
+
+        <h2>3. Konto Discord</h2>
+        <p>Logowanie odbywa się wyłącznie przez oficjalny mechanizm OAuth2 Discord. Nie przechowujemy
+        haseł użytkowników. Odpowiadasz za bezpieczeństwo swojego konta Discord — utrata dostępu
+        do niego może oznaczać utratę dostępu do przypisanych licencji.</p>
+
+        <h2>4. Płatności i zwroty</h2>
+        <p>Ze względu na cyfrowy charakter produktów, po aktywacji klucza licencyjnego zwrot środków
+        nie przysługuje, chyba że produkt jest wadliwy i nie da się go naprawić w rozsądnym terminie.</p>
+
+        <h2>5. Wsparcie techniczne</h2>
+        <p>Wsparcie świadczone jest za pośrednictwem serwera Discord. Staramy się odpowiadać możliwie
+        szybko, jednak nie gwarantujemy konkretnego czasu reakcji poza godzinami pracy zespołu.</p>
+
+        <h2>6. Ograniczenie odpowiedzialności</h2>
+        <p>Nie ponosimy odpowiedzialności za szkody pośrednie wynikające z użycia naszych produktów,
+        w tym za przerwy w działaniu gry spowodowane zmianami w platformie Roblox.</p>
+
+        <h2>7. Zmiany regulaminu</h2>
+        <p>Zastrzegamy sobie prawo do zmiany niniejszego regulaminu. O istotnych zmianach poinformujemy
+        na serwerze Discord.</p>
+
+      </div>
+
+      <p style="color:var(--text-muted);font-size:12.5px;text-align:center;margin-top:24px;">
+        To jest przykładowa treść — podmień ją na własną, dopasowaną do realnych zasad Twojego serwisu.
+      </p>
+
+    </div>
+  </section>
+</main>
+
+<div id="site-footer-slot"></div>
+
+<script src="assets/include.js"></script>
+<script>
+  document.getElementById('regDate').textContent = new Date().toLocaleDateString('pl-PL');
+</script>
+</body>
+</html>
