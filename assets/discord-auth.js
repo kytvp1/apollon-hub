@@ -11,7 +11,7 @@
   4. Podmień AV_REDIRECT_URI na dokładny adres z punktu 2 (musi być identyczny co do znaku).
 */
 
-const AV_DISCORD_CLIENT_ID = 'WPISZ_TU_SWOJE_CLIENT_ID';
+const AV_DISCORD_CLIENT_ID = '1544107272630964234';
 const AV_REDIRECT_URI = window.location.origin + window.location.pathname; // domyślnie: ta sama strona (konto.html)
 const AV_SCOPE = 'identify';
 

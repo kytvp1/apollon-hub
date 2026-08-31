@@ -30,7 +30,7 @@ const AV_BOTS = [
   {
     id: 'api',
     widgetUsername: 'Apollon API',
-    name: 'Apollon API',
+    name: 'Roblox API',
     desc: 'Weryfikacja konta Roblox i Discord oraz sprawdzanie banów na Roblox.',
     invite: 'https://discord.gg/FjP3PnDGJQ',
     critical: false
@@ -46,7 +46,7 @@ const AV_BOTS = [
   {
     id: 'radio',
     widgetUsername: 'radio',
-    name: 'Apollon Roblox Radio',
+    name: 'Radio API',
     desc: 'Obsługuje system radia Roblox na serwerze.',
     invite: 'https://discord.gg/FjP3PnDGJQ',
     critical: false
@@ -73,10 +73,7 @@ function av_statusLabel(status) {
 function av_renderBotCards(container) {
   container.innerHTML = AV_BOTS.map(bot => {
     const rest = bot.name.replace(/^Apollon\s*/i, '').trim();
-    const words = rest.split(/\s+/).filter(Boolean);
-    const initials = words.length > 1
-      ? (words[0][0] + words[1][0]).toUpperCase()
-      : rest.slice(0, 2).toUpperCase();
+    const initials = rest.slice(0, 2).toUpperCase();
     return `
       <div class="card">
         <div class="card-body">
@@ -84,7 +81,7 @@ function av_renderBotCards(container) {
             <div class="bot-avatar">${initials}</div>
             <div class="name">
               <strong>${bot.name}</strong>
-              <span>${bot.critical ? 'Bot krytyczny dla licencji' : 'Bot pomocniczy'}</span>
+              <span>${bot.critical ? 'Licencje' : 'Bot pomocniczy'}</span>
             </div>
           </div>
           <p style="margin:14px 0 0;">${bot.desc}</p>
