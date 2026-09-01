@@ -26,6 +26,12 @@
 
 const AV_GUILD_ID = '1489354594562740324';
 
+// Pole "healthUrl" (opcjonalne) — jeśli bot ma własny publiczny serwer HTTP (tak jak
+// Apollon Licencje), strona odpytuje go BEZPOŚREDNIO zamiast polegać na statusie
+// widocznym na Discordzie. To ważne, bo Discord potrafi pokazywać bota jako "online"
+// jeszcze przez jakiś czas po tym, jak faktycznie go zatrzymasz (np. w panelu
+// bot-hosting.net) — bezpośrednie sprawdzenie serwera wykrywa to od razu.
+// Musi się zgadzać z adresem bota w assets/licenses.js (AV_LICENSE_API_BASE) + "/api/health".
 const AV_BOTS = [
   {
     id: 'api',
@@ -39,7 +45,8 @@ const AV_BOTS = [
     widgetUsername: 'licencje',
     name: 'Apollon Licencje',
     desc: 'Weryfikuje konto Discord i aktywuje zakupione klucze licencyjne produktów.',
-    critical: true
+    critical: true,
+    healthUrl: 'https://xms87hmsab.apps.bot-hosting.cloud/api/health'
   },
   {
     id: 'radio',
@@ -50,10 +57,14 @@ const AV_BOTS = [
   }
 ];
 
-async function av_fetchGuildWidget() {
-  if (!AV_GUILD_ID || AV_GUILD_ID.startsWith('WPISZ')) return null;
+// guildId jest opcjonalny — domyślnie pobiera widżet serwera z botami (AV_GUILD_ID).
+// Strona główna (assets/site-stats.js) wywołuje tę samą funkcję z ID serwera społeczności
+// (AV_COMMUNITY_GUILD_ID), żeby pokazać liczbę aktywnych osób z WŁAŚCIWEGO serwera.
+async function av_fetchGuildWidget(guildId) {
+  const id = guildId || AV_GUILD_ID;
+  if (!id || id.startsWith('WPISZ')) return null;
   try {
-    const res = await fetch(`https://discord.com/api/guilds/${AV_GUILD_ID}/widget.json`);
+    const res = await fetch(`https://discord.com/api/guilds/${id}/widget.json`);
     if (!res.ok) return null;
     return await res.json();
   } catch (e) {
@@ -70,16 +81,40 @@ function av_statusLabel(status) {
 // Zwraca [{ bot, status }] dla wszystkich botów z AV_BOTS, na podstawie widżetu Discord.
 // status: 'online' | 'offline' | 'unknown' (unknown = widżet niedostępny/niekonfigurowany —
 // wtedy NIE zakładamy, że coś jest nie tak, tylko że po prostu nie mamy danych).
+// Bezpośrednie sprawdzenie serwera bota (patrz pole "healthUrl" w AV_BOTS) — z krótkim
+// limitem czasu, żeby zawieszony/martwy serwer nie blokował strony na długo.
+async function av_checkBotHealth(url) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timeout);
+    return res.ok;
+  } catch (e) {
+    return false; // brak odpowiedzi / timeout / bot faktycznie offline = traktujemy jako awarię
+  }
+}
+
 async function av_getBotStatuses() {
   const widget = await av_fetchGuildWidget();
-  return AV_BOTS.map(bot => {
+  const results = [];
+  for (const bot of AV_BOTS) {
+    if (bot.healthUrl) {
+      // Bot ma własny serwer — sprawdzamy go BEZPOŚREDNIO, to szybsze i pewniejsze
+      // niż czekanie, aż Discord zaktualizuje status obecności. Ten wynik jest zawsze
+      // "pewny" (source: 'health') — nie ma tu stanu "nieznany".
+      const alive = await av_checkBotHealth(bot.healthUrl);
+      results.push({ bot, status: alive ? 'online' : 'offline', source: 'health' });
+      continue;
+    }
     let status = 'unknown';
     if (widget && bot.widgetUsername) {
       const member = (widget.members || []).find(m => m.username === bot.widgetUsername);
       status = member ? 'online' : 'offline';
     }
-    return { bot, status };
-  });
+    results.push({ bot, status, source: 'widget' });
+  }
+  return results;
 }
 
 function av_renderBotCards(container) {
@@ -114,9 +149,8 @@ async function av_initBotStatus() {
   av_renderBotCards(container);
 
   const results = await av_getBotStatuses();
-  const widgetOk = results.some(r => r.status !== 'unknown');
 
-  results.forEach(({ bot, status }) => {
+  results.forEach(({ bot, status, source }) => {
     const label = av_statusLabel(status);
     const row = document.getElementById(`bot-status-${bot.id}`);
     if (row) {
@@ -125,9 +159,13 @@ async function av_initBotStatus() {
     }
     const updated = document.getElementById(`bot-updated-${bot.id}`);
     if (updated) {
-      updated.textContent = widgetOk
-        ? `Ostatnie sprawdzenie: ${new Date().toLocaleTimeString('pl-PL')}`
-        : 'Status na żywo wyłączony — skonfiguruj widżet Discord w assets/bot-status.js';
+      if (source === 'health') {
+        updated.textContent = `Sprawdzane bezpośrednio na żywo: ${new Date().toLocaleTimeString('pl-PL')}`;
+      } else if (status !== 'unknown') {
+        updated.textContent = `Ostatnie sprawdzenie: ${new Date().toLocaleTimeString('pl-PL')}`;
+      } else {
+        updated.textContent = 'Status na żywo wyłączony — skonfiguruj widżet Discord w assets/bot-status.js';
+      }
     }
   });
 }
@@ -170,6 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
   av_initBotStatus();
   av_initHeroStatusBadge();
   // Odśwież status co 60 sekund, jeśli użytkownik zostanie na stronie.
-  setInterval(av_initBotStatus, 60000);
-  setInterval(av_initHeroStatusBadge, 60000);
+  setInterval(av_initBotStatus, 20000);
+  setInterval(av_initHeroStatusBadge, 20000);
 });

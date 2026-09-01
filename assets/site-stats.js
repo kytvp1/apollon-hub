@@ -2,10 +2,11 @@
   Statystyki na stronie głównej ("Apollon Hub w liczbach").
 
   1) "Aktywnych na Discordzie" — AKTUALIZUJE SIĘ SAMA. Pobiera liczbę osób online
-     z tego samego widżetu Discord, co strona "Status botów" (patrz AV_GUILD_ID
-     w pliku assets/bot-status.js — musi być wypełnione i widżet musi być włączony
-     w ustawieniach serwera). Jeśli widżet jest wyłączony/niedostępny, pokazuje się
-     wartość zapasowa z pola "activeFallback" poniżej.
+     z widżetu GŁÓWNEGO serwera społeczności (tego z zaproszenia na stronie
+     "Discord", NIE serwera, na którym stoją boty) — jego ID wpisujesz poniżej
+     w AV_COMMUNITY_GUILD_ID. Widżet musi być włączony w ustawieniach tego serwera
+     (Ustawienia serwera → Widżet). Jeśli widżet jest wyłączony/niedostępny,
+     pokazuje się wartość zapasowa z pola "activeFallback" poniżej.
 
   2) Pozostałe liczby (sprzedane licencje, liczba produktów) NIE aktualizują się
      same — Discord ani bot nie udostępniają takiej statystyki publicznie. Żeby
@@ -13,8 +14,10 @@
      np. licensesSold: '620+'. Zmiana pojawi się na stronie od razu po wgraniu pliku.
 */
 
+const AV_COMMUNITY_GUILD_ID = '1137772207733493790'; // serwer społeczności (z zaproszenia), nie serwer botów
+
 const AV_STATS = {
-  activeFallback: '150+', // pokazywane tylko gdy widżet Discord jest wyłączony/nieskonfigurowany
+  activeFallback: '505+', // pokazywane tylko gdy widżet Discord jest wyłączony/nieosiągalny — zaktualizuj ręcznie w razie potrzeby
   licensesSold: '500+',   // <-- zmień ręcznie, gdy sprzedasz więcej licencji
   products: '6+',         // <-- zmień ręcznie, gdy dodasz/usuniesz produkty
 };
@@ -34,7 +37,7 @@ async function av_initHomeStats() {
     return;
   }
 
-  const widget = await av_fetchGuildWidget();
+  const widget = await av_fetchGuildWidget(AV_COMMUNITY_GUILD_ID);
   if (widget && typeof widget.presence_count === 'number') {
     elActive.textContent = String(widget.presence_count);
   } else {

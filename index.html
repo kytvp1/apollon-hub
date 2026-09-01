@@ -147,17 +147,17 @@
   </section>
 
   <!--
-    MIEJSCE NA BANER — wstaw tu grafikę promo/reklamową (np. baner wydarzenia,
-    ogłoszenie, reklama partnera). Podmień zawartość .banner-slot na obrazek lub
-    link z obrazkiem, np.:
-      <a href="produkty.html" class="banner-slot" style="padding:0;">
-        <img src="assets/banners/promo.jpg" alt="Opis banera" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
-      </a>
-    Zalecany format: szeroki prostokąt (np. 1200×250px), żeby dobrze wyglądał na telefonie i komputerze.
+    4 MIEJSCA NA BANERY — sterowane z pliku assets/banners.js. Żeby wstawić grafikę,
+    edytuj tablicę AV_BANNERS w tym pliku (nie ten HTML) — instrukcja jest w komentarzu
+    na górze tamtego pliku.
   -->
   <section class="section tight">
     <div class="container">
-      <div class="banner-slot">Miejsce na baner</div>
+      <div class="section-head" style="margin-bottom:26px;">
+        <div class="tag">Promocje</div>
+        <h2>Banery</h2>
+      </div>
+      <div class="banners-grid" id="bannersGrid"></div>
     </div>
   </section>
 
@@ -183,5 +183,6 @@
 <script src="assets/include.js"></script>
 <script src="assets/bot-status.js"></script>
 <script src="assets/site-stats.js"></script>
+<script src="assets/banners.js"></script>
 </body>
 </html>
