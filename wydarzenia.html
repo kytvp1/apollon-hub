@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wydarzenia — Apollon Hub API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="wydarzenia">
+
+<div id="site-header-slot"></div>
+
+<main>
+  <section class="section" style="padding-top:60px;">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:50px;">
+        <div class="tag">Świętujemy razem</div>
+        <h2>Wydarzenia — tydzień 3. urodzin</h2>
+        <p>Z okazji 3. urodzin Apollon Hub przygotowaliśmy tydzień pełen wydarzeń: konkursy, zniżki i wspólne granie na Discordzie. Szczegóły i ogłoszenia zwycięzców publikujemy na bieżąco na serwerze.</p>
+        <p class="wheel-sub" style="text-align:center;margin-top:14px;">Tydzień urodzinowy kończy się za: <strong data-birthday-countdown>--:--:--</strong></p>
+      </div>
+
+      <!--
+        Panel z kodami rabatowymi wylosowanymi na kole fortuny na stronie głównej
+        (assets/birthday.js) — kody trzymane są w przeglądarce użytkownika (localStorage).
+      -->
+      <div class="panel mycode-panel" id="myCodesPanel"></div>
+
+      <!--
+        Lista wydarzeń jest sterowana z pliku assets/events.js —
+        żeby dodać/usunąć/zmienić wydarzenie, edytuj tablicę AV_EVENTS w tym pliku,
+        nie ten HTML.
+      -->
+      <div class="grid" id="eventsGrid"></div>
+
+      <p style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:40px;">
+        Chcesz nie przegapić żadnego wydarzenia? Dołącz do naszego serwera
+        <a href="discord.html" style="color:var(--accent-2);font-weight:700;">Discord</a> — wszystkie ogłoszenia pojawiają się tam najpierw.
+      </p>
+    </div>
+  </section>
+</main>
+
+<div id="site-footer-slot"></div>
+
+<script src="assets/include.js"></script>
+<script src="assets/birthday.js"></script>
+<script src="assets/events.js"></script>
+</body>
+</html>
