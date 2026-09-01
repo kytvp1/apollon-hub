@@ -176,7 +176,9 @@ function av_formatCountdown(ms) {
   const mins = Math.floor((totalSec % 3600) / 60);
   const secs = totalSec % 60;
   const pad = (n) => String(n).padStart(2, '0');
-  if (days > 0) return `${days} dni ${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+  // Prawdziwy tykający zegar przez cały tydzień - godziny/minuty/sekundy liczą się
+  // na żywo obok dni, nie tylko "N dni" zmieniające się raz na dobę.
+  if (days > 0) return `${days} ${days === 1 ? 'dzień' : 'dni'} ${pad(hours)}:${pad(mins)}:${pad(secs)}`;
   return `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
 }
 
@@ -425,18 +427,14 @@ function av_closeToast(toast) {
   setTimeout(() => toast.remove(), 300);
 }
 
-function av_initBirthdayBanner() {
-  if (!AV_BIRTHDAY.enabled) return;
-
-  const end = new Date(AV_BIRTHDAY.endsAt).getTime();
-  if (Date.now() > end) return; // tydzień urodzinowy się zakończył
-
-  try {
-    if (sessionStorage.getItem(AV_BIRTHDAY_SEEN_KEY)) return;
-  } catch (e) {}
+// Buduje i pokazuje dymek z kołem (albo ekranem "już zakręcone") - wydzielone z
+// av_initBirthdayBanner, żeby dało się to samo okno otworzyć również NA ŻĄDANIE
+// (patrz obsługa #kolo poniżej), a nie tylko przy automatycznym pierwszym wejściu.
+function av_openWheelModal({ withConfetti }) {
+  if (document.querySelector('.birthday-toast')) return; // już otwarte
 
   const alreadySpun = av_hasSpun();
-  av_launchConfetti(1);
+  if (withConfetti) av_launchConfetti(1);
 
   const toast = document.createElement('div');
   toast.className = alreadySpun ? 'birthday-toast' : 'birthday-toast wheel-modal';
@@ -455,6 +453,31 @@ function av_initBirthdayBanner() {
   }
 
   av_updateCountdownEls();
+}
+
+function av_initBirthdayBanner() {
+  if (!AV_BIRTHDAY.enabled) return;
+
+  const end = new Date(AV_BIRTHDAY.endsAt).getTime();
+  if (Date.now() > end) return; // tydzień urodzinowy się zakończył
+
+  // Wejście z linku "Zakręć kołem" (np. z paska ogłoszenia widocznego na KAŻDEJ
+  // podstronie, albo z zakładki Wydarzenia) - koło ma się pokazać ZAWSZE po takim
+  // kliknięciu, nawet jeśli dymek był już raz widziany automatycznie w tej sesji.
+  // Bez tego link przenosił na stronę główną, ale nic się nie działo, bo
+  // poniższy licznik sesji już był ustawiony przy pierwszym wejściu na stronę.
+  if (window.location.hash === '#kolo') {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    av_openWheelModal({ withConfetti: false });
+    try { sessionStorage.setItem(AV_BIRTHDAY_SEEN_KEY, '1'); } catch (e) {}
+    return;
+  }
+
+  try {
+    if (sessionStorage.getItem(AV_BIRTHDAY_SEEN_KEY)) return;
+  } catch (e) {}
+
+  av_openWheelModal({ withConfetti: true });
 
   try { sessionStorage.setItem(AV_BIRTHDAY_SEEN_KEY, '1'); } catch (e) {}
 }
@@ -476,7 +499,7 @@ function av_initAnnouncementBar() {
   if (document.querySelector('.announcement-bar')) return;
 
   const spun = av_hasSpun();
-  const ctaHref = spun ? 'wydarzenia.html' : 'index.html';
+  const ctaHref = spun ? 'wydarzenia.html' : 'index.html#kolo';
   const ctaText = spun ? 'Zobacz mój kod →' : 'Zakręć kołem i wygraj do -40% →';
 
   const bar = document.createElement('div');
@@ -513,7 +536,7 @@ function av_renderMyWheelCodes() {
     panel.innerHTML = `
       <h3 style="margin:0 0 8px;">Twoje kody rabatowe</h3>
       <p style="color:var(--text-muted);font-size:14px;margin:0 0 16px;">Nie masz jeszcze żadnego kodu — wróć na stronę główną i zakręć kołem urodzinowym, może się poszczęści!</p>
-      <a href="index.html" class="btn btn-primary">Zakręć kołem →</a>
+      <a href="index.html#kolo" class="btn btn-primary">Zakręć kołem →</a>
     `;
     return;
   }
