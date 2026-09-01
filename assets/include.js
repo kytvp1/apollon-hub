@@ -75,7 +75,8 @@ function av_initCookieBanner() {
   bar.className = 'cookie-banner';
   bar.innerHTML =
     '<p>Ta strona korzysta wyłącznie z niezbędnych plików cookie / localStorage — do zapamiętania ' +
-    'sesji Twojego konta Discord oraz lokalnego zapisu licencji demo w Twojej przeglądarce. ' +
+    'sesji Twojego konta Discord oraz zapamiętania akceptacji tej informacji. Po zalogowaniu Twój ' +
+    'Discord ID jest wysyłany do naszego własnego bota licencyjnego, żeby pokazać Twoje licencje. ' +
     'Nie używamy cookies reklamowych ani analitycznych. Szczegóły w ' +
     '<a href="regulamin.html#cookies" style="color:var(--accent-2);font-weight:700;">Regulaminie</a>.</p>' +
     '<button class="btn btn-primary" id="cookieAcceptBtn">Rozumiem</button>';

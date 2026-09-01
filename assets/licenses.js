@@ -1,123 +1,104 @@
 /*
-  Moje licencje — DEMO działające w 100% w przeglądarce (localStorage).
-  To pokazuje pełny interfejs (dodawanie klucza, lista, usuwanie), ale NIE weryfikuje
-  realnie kluczy licencyjnych — statyczna strona (GitHub Pages) nie ma własnej bazy danych.
+  Moje licencje — pobiera PRAWDZIWE dane z Twojego bota Discord (bezpieczny endpoint
+  tylko do odczytu: /api/my-licenses), zamiast dawnego demo w localStorage.
 
-  Żeby to działało naprawdę (prawdziwe klucze wydawane po zakupie, wiązane z Discord ID
-  na stałe, widoczne dla Twojego bota Discord), potrzebny jest mały backend, np.:
-  - darmowa baza danych typu Supabase/Firebase + kilka linijek kodu, albo
-  - Twój bot Discord jako "backend", zapisujący/odczytujący licencje przez własne API.
-  Ten plik zostawia w kodzie jasno oznaczone miejsce (AV_VALIDATE_KEY), gdzie taką
-  prawdziwą walidację się podepnie.
+  KONFIGURACJA (wymagana):
+  Wklej poniżej publiczny adres, pod którym stoi Twój bot (ten sam co PUBLIC_API_URL
+  w .env bota, ale BEZ końcówki "/api/validate" — sam host + port), np.:
+  const AV_LICENSE_API_BASE = 'http://twoja-subdomena.bot-hosting.net:3000';
+
+  Dopóki zostanie tu placeholder "WPISZ...", strona pokaże czytelny komunikat zamiast
+  próbować się łączyć donikąd.
 */
 
-const AV_LICENSES_KEY = 'apollonhub_licenses_demo';
+const AV_LICENSE_API_BASE = 'https://xms87hmsab.apps.bot-hosting.cloud';
 
-function av_getLicenses() {
-  try {
-    const raw = localStorage.getItem(AV_LICENSES_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
+const AV_STATUS_LABELS = {
+  pending: 'Oczekuje',
+  active: 'Odblokowana',
+  blocked: 'Zablokowana',
+};
+
+const AV_STATUS_BADGE = {
+  pending: 'info',
+  active: 'online',
+  blocked: 'offline',
+};
+
+function av_licenseApiConfigured() {
+  return !!AV_LICENSE_API_BASE && !AV_LICENSE_API_BASE.startsWith('WPISZ');
 }
 
-function av_saveLicenses(list) {
-  localStorage.setItem(AV_LICENSES_KEY, JSON.stringify(list));
+async function av_fetchMyLicenses(discordId) {
+  const res = await fetch(`${AV_LICENSE_API_BASE}/api/my-licenses?discordId=${encodeURIComponent(discordId)}`);
+  if (!res.ok) throw new Error('bad_response');
+  const data = await res.json();
+  if (!data.ok) throw new Error('api_error');
+  return data.licenses || [];
 }
 
-// Miejsce na prawdziwą walidację klucza względem Twojej bazy/API (patrz komentarz wyżej).
-// Na razie: akceptuje klucze w formacie AHUB-XXXX-XXXX-XXXX (tylko sprawdzenie formatu).
-function AV_VALIDATE_KEY(key) {
-  return /^AHUB-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key.trim().toUpperCase());
+function av_showState(state) {
+  const ids = {
+    'not-logged-in': 'licensesLoginNeeded',
+    'not-configured': 'licensesApiMissing',
+    'error': 'licensesError',
+    'empty': 'licensesEmpty',
+    'ok': 'licensesTableWrap',
+  };
+  Object.values(ids).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const target = document.getElementById(ids[state]);
+  if (target) target.style.display = 'block';
 }
 
-function av_renderLicenses() {
+function av_renderLicenses(licenses) {
   const tbody = document.getElementById('licensesTableBody');
-  const empty = document.getElementById('licensesEmpty');
   if (!tbody) return;
+  tbody.innerHTML = licenses.map((lic) => {
+    const badge = AV_STATUS_BADGE[lic.status] || 'info';
+    const label = AV_STATUS_LABELS[lic.status] || lic.status;
+    return `
+      <tr>
+        <td>${lic.product}</td>
+        <td class="mono">${lic.key}</td>
+        <td><span class="badge ${badge}">${label}</span></td>
+        <td>${lic.note ? lic.note : '—'}</td>
+      </tr>
+    `;
+  }).join('');
+}
 
-  const list = av_getLicenses();
-  tbody.innerHTML = '';
+async function av_initLicenses() {
+  if (!document.getElementById('licensesTableBody')) return;
 
-  if (list.length === 0) {
-    if (empty) empty.style.display = 'block';
+  if (!av_licenseApiConfigured()) {
+    av_showState('not-configured');
     return;
   }
-  if (empty) empty.style.display = 'none';
 
-  list.forEach((lic, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${lic.model}</td>
-      <td class="mono">${lic.key}</td>
-      <td><span class="badge online">Aktywna</span></td>
-      <td>${lic.addedAt}</td>
-      <td><button class="btn btn-outline" data-idx="${idx}" style="padding:6px 12px;font-size:12px;">Usuń</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
+  const user = av_getDiscordUser ? av_getDiscordUser() : null;
+  if (!user) {
+    av_showState('not-logged-in');
+    return;
+  }
 
-  tbody.querySelectorAll('button[data-idx]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const list2 = av_getLicenses();
-      list2.splice(Number(btn.dataset.idx), 1);
-      av_saveLicenses(list2);
-      av_renderLicenses();
-    });
-  });
-}
-
-function av_initLicenseForm() {
-  const form = document.getElementById('addLicenseForm');
-  const statusMsg = document.getElementById('licenseStatusMsg');
-  if (!form) return;
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const model = document.getElementById('licenseModel').value.trim();
-    const key = document.getElementById('licenseKey').value.trim().toUpperCase();
-
-    const user = av_getDiscordUser ? av_getDiscordUser() : null;
-
-    statusMsg.className = 'status-msg show';
-
-    if (!user) {
-      statusMsg.classList.add('err');
-      statusMsg.textContent = 'Najpierw połącz konto Discord na stronie "Konto Discord" — licencje są przypisywane do Twojego Discord ID.';
+  try {
+    const licenses = await av_fetchMyLicenses(user.id);
+    if (licenses.length === 0) {
+      av_showState('empty');
       return;
     }
-    if (!model) {
-      statusMsg.classList.add('err');
-      statusMsg.textContent = 'Podaj nazwę modelu / produktu.';
-      return;
-    }
-    if (!AV_VALIDATE_KEY(key)) {
-      statusMsg.classList.add('err');
-      statusMsg.textContent = 'Nieprawidłowy format klucza. Oczekiwany: AHUB-XXXX-XXXX-XXXX';
-      return;
-    }
-
-    const list = av_getLicenses();
-    list.unshift({
-      model,
-      key,
-      discordId: user.id,
-      addedAt: new Date().toLocaleDateString('pl-PL')
-    });
-    av_saveLicenses(list);
-    av_renderLicenses();
-
-    statusMsg.classList.remove('err');
-    statusMsg.classList.add('ok');
-    statusMsg.textContent = `Licencja dodana i powiązana z Discord ID ${user.id}.`;
-    form.reset();
-  });
+    av_renderLicenses(licenses);
+    av_showState('ok');
+  } catch (e) {
+    av_showState('error');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    av_renderLicenses();
-    av_initLicenseForm();
-  }, 150);
+  // Malutkie opoznienie - av_getDiscordUser czyta z localStorage wypelnianego
+  // przez include.js/discord-auth.js, ktore rowniez startuja na DOMContentLoaded.
+  setTimeout(av_initLicenses, 150);
 });

@@ -20,52 +20,42 @@
       <div class="section-head" style="margin-bottom:40px;">
         <div class="tag">Twoje konto</div>
         <h2>Moje licencje</h2>
-        <p>Aktywuj klucz otrzymany po zakupie — zostanie przypisany do Twojego połączonego konta Discord.</p>
+        <p>Licencje przypisane do Twojego połączonego konta Discord pojawiają się tutaj automatycznie.</p>
       </div>
 
       <div class="panel">
-        <h3 style="margin-top:0;">Aktywuj nową licencję</h3>
-        <form id="addLicenseForm">
-          <div class="field">
-            <label for="licenseModel">Nazwa modelu / produktu</label>
-            <input type="text" id="licenseModel" placeholder="np. Mapa Miasta — City Map" required>
-          </div>
-          <div class="field">
-            <label for="licenseKey">Klucz licencyjny</label>
-            <input type="text" id="licenseKey" placeholder="AHUB-XXXX-XXXX-XXXX" required>
-            <div class="hint">Format: AHUB-XXXX-XXXX-XXXX — klucz otrzymujesz po zakupie na Discordzie.</div>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">Aktywuj licencję</button>
-          <div class="status-msg" id="licenseStatusMsg"></div>
-        </form>
-      </div>
+        <h3 style="margin-top:0;">Twoje licencje</h3>
 
-      <div class="panel">
-        <h3 style="margin-top:0;">Twoje aktywne licencje</h3>
-        <div style="overflow-x:auto;">
+        <p id="licensesLoginNeeded" style="display:none;color:var(--text-muted);font-size:13.5px;text-align:center;padding:20px 0;">
+          Najpierw połącz konto Discord na stronie <a href="konto.html" style="color:var(--accent-2);font-weight:700;">Konto</a> — licencje są przypisane do Twojego Discord ID.
+        </p>
+
+        <p id="licensesApiMissing" style="display:none;color:var(--text-muted);font-size:13.5px;text-align:center;padding:20px 0;">
+          Połączenie z bazą licencji nie jest jeszcze skonfigurowane (patrz komentarz w pliku <code>assets/licenses.js</code>).
+        </p>
+
+        <p id="licensesError" style="display:none;color:var(--danger);font-size:13.5px;text-align:center;padding:20px 0;">
+          Nie udało się pobrać Twoich licencji — bot może być chwilowo offline. Sprawdź stronę
+          <a href="statusy-botow.html" style="color:var(--accent-2);font-weight:700;">Status botów</a> albo spróbuj ponownie za chwilę.
+        </p>
+
+        <div id="licensesTableWrap" style="display:none;overflow-x:auto;">
           <table class="licenses">
             <thead>
               <tr>
-                <th>Model</th>
+                <th>Produkt</th>
                 <th>Klucz</th>
                 <th>Status</th>
-                <th>Dodano</th>
-                <th></th>
+                <th>Notatka</th>
               </tr>
             </thead>
             <tbody id="licensesTableBody"></tbody>
           </table>
         </div>
-        <p id="licensesEmpty" style="color:var(--text-muted);font-size:13.5px;text-align:center;padding:20px 0;">
-          Nie masz jeszcze żadnych aktywowanych licencji.
+        <p id="licensesEmpty" style="display:none;color:var(--text-muted);font-size:13.5px;text-align:center;padding:20px 0;">
+          Nie masz jeszcze żadnych licencji przypisanych do tego konta Discord.
         </p>
       </div>
-
-      <p style="color:var(--text-muted);font-size:12.5px;text-align:center;">
-        Uwaga: to jest interfejs demonstracyjny działający lokalnie w Twojej przeglądarce.
-        Do prawdziwej weryfikacji kluczy i trwałego zapisu licencji potrzebny jest backend —
-        patrz komentarz w pliku <code>assets/licenses.js</code>.
-      </p>
 
     </div>
   </section>

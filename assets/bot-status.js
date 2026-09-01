@@ -32,7 +32,6 @@ const AV_BOTS = [
     widgetUsername: 'Apollon API',
     name: 'Roblox API',
     desc: 'Weryfikacja konta Roblox i Discord oraz sprawdzanie banów na Roblox.',
-    invite: 'https://discord.gg/FjP3PnDGJQ',
     critical: false
   },
   {
@@ -40,7 +39,6 @@ const AV_BOTS = [
     widgetUsername: 'licencje',
     name: 'Apollon Licencje',
     desc: 'Weryfikuje konto Discord i aktywuje zakupione klucze licencyjne produktów.',
-    invite: 'https://discord.gg/FjP3PnDGJQ',
     critical: true
   },
   {
@@ -48,7 +46,6 @@ const AV_BOTS = [
     widgetUsername: 'radio',
     name: 'Radio API',
     desc: 'Obsługuje system radia Roblox na serwerze.',
-    invite: 'https://discord.gg/FjP3PnDGJQ',
     critical: false
   }
 ];
@@ -89,9 +86,6 @@ function av_renderBotCards(container) {
             <span class="badge info">Sprawdzanie…</span>
           </div>
           <div class="bot-updated" id="bot-updated-${bot.id}"></div>
-          <div class="card-footer" style="margin-top:16px;">
-            <a href="${bot.invite}" class="btn-text" style="padding:4px 0;">Zaproś / kanał bota →</a>
-          </div>
         </div>
       </div>
     `;
