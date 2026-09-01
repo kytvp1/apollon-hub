@@ -125,11 +125,9 @@
   </section>
 
   <!--
-    SEKCJA "OFICJALNI PARTNERZY" — miejsca na loga są na razie puste (placeholder).
-    Żeby dodać prawdziwe logo partnera, w każdym .partner-slot podmień zawartość
-    (napis) na obrazek, np.:
-      <div class="partner-slot"><img src="assets/partners/nazwa.png" alt="Nazwa partnera"></div>
-    Chcesz więcej/mniej miejsc — po prostu skopiuj/usuń całe bloki .partner-slot.
+    SEKCJA "OFICJALNI PARTNERZY" — sterowana z pliku assets/partners.js. Żeby dodać
+    logo partnera, edytuj tablicę AV_PARTNERS w tym pliku (nie ten HTML) — instrukcja
+    jest w komentarzu na górze tamtego pliku.
   -->
   <section class="section tight">
     <div class="container">
@@ -137,12 +135,7 @@
         <div class="tag">Współpraca</div>
         <h2>Oficjalni partnerzy</h2>
       </div>
-      <div class="partners-strip">
-        <div class="partner-slot">Miejsce na logo</div>
-        <div class="partner-slot">Miejsce na logo</div>
-        <div class="partner-slot">Miejsce na logo</div>
-        <div class="partner-slot">Miejsce na logo</div>
-      </div>
+      <div class="partners-strip" id="partnersGrid"></div>
     </div>
   </section>
 
@@ -183,6 +176,7 @@
 <script src="assets/include.js"></script>
 <script src="assets/bot-status.js"></script>
 <script src="assets/site-stats.js"></script>
+<script src="assets/partners.js"></script>
 <script src="assets/banners.js"></script>
 </body>
 </html>
