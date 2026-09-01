@@ -42,9 +42,9 @@ function av_afterIncludeReady() {
       links.style.top = '64px';
       links.style.left = '0';
       links.style.right = '0';
-      links.style.background = '#0a0b0f';
+      links.style.background = '#09090b';
       links.style.padding = '10px 24px 18px';
-      links.style.borderBottom = '1px solid #24262e';
+      links.style.borderBottom = '1px solid #232327';
     });
   }
 

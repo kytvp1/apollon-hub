@@ -67,6 +67,21 @@ function av_statusLabel(status) {
   return { text: 'Status nieznany', badge: 'info' };
 }
 
+// Zwraca [{ bot, status }] dla wszystkich botów z AV_BOTS, na podstawie widżetu Discord.
+// status: 'online' | 'offline' | 'unknown' (unknown = widżet niedostępny/niekonfigurowany —
+// wtedy NIE zakładamy, że coś jest nie tak, tylko że po prostu nie mamy danych).
+async function av_getBotStatuses() {
+  const widget = await av_fetchGuildWidget();
+  return AV_BOTS.map(bot => {
+    let status = 'unknown';
+    if (widget && bot.widgetUsername) {
+      const member = (widget.members || []).find(m => m.username === bot.widgetUsername);
+      status = member ? 'online' : 'offline';
+    }
+    return { bot, status };
+  });
+}
+
 function av_renderBotCards(container) {
   container.innerHTML = AV_BOTS.map(bot => {
     const rest = bot.name.replace(/^Apollon\s*/i, '').trim();
@@ -98,14 +113,10 @@ async function av_initBotStatus() {
 
   av_renderBotCards(container);
 
-  const widget = await av_fetchGuildWidget();
+  const results = await av_getBotStatuses();
+  const widgetOk = results.some(r => r.status !== 'unknown');
 
-  AV_BOTS.forEach(bot => {
-    let status = 'unknown';
-    if (widget && bot.widgetUsername) {
-      const member = (widget.members || []).find(m => m.username === bot.widgetUsername);
-      status = member ? 'online' : 'offline';
-    }
+  results.forEach(({ bot, status }) => {
     const label = av_statusLabel(status);
     const row = document.getElementById(`bot-status-${bot.id}`);
     if (row) {
@@ -114,15 +125,51 @@ async function av_initBotStatus() {
     }
     const updated = document.getElementById(`bot-updated-${bot.id}`);
     if (updated) {
-      updated.textContent = widget
+      updated.textContent = widgetOk
         ? `Ostatnie sprawdzenie: ${new Date().toLocaleTimeString('pl-PL')}`
         : 'Status na żywo wyłączony — skonfiguruj widżet Discord w assets/bot-status.js';
     }
   });
 }
 
+// Pasek "Wszystkie systemy działają poprawnie" na stronie głównej (#heroStatusBadge).
+// Jeśli widżet Discord wykryje, że któryś bot jest offline, pasek zmienia się na
+// czerwony i pokazuje "Awaria bota: <nazwa>". Gdy nie mamy danych (widżet wyłączony/
+// niekonfigurowany), zostaje domyślny, zielony komunikat — nie zgadujemy awarii.
+async function av_initHeroStatusBadge() {
+  const el = document.getElementById('heroStatusBadge');
+  if (!el) return;
+
+  const dot = el.querySelector('.dot');
+  const text = el.querySelector('.status-text');
+  if (!dot || !text) return;
+
+  const results = await av_getBotStatuses();
+  const offline = results.filter(r => r.status === 'offline').map(r => r.bot.name);
+
+  if (offline.length === 0) {
+    dot.style.background = 'var(--success)';
+    dot.style.boxShadow = '0 0 8px var(--success)';
+    el.style.borderColor = '';
+    el.style.background = '';
+    el.style.color = '';
+    text.textContent = 'Wszystkie systemy działają poprawnie';
+  } else {
+    dot.style.background = 'var(--danger)';
+    dot.style.boxShadow = '0 0 8px var(--danger)';
+    el.style.borderColor = 'rgba(255, 93, 108, 0.35)';
+    el.style.background = 'rgba(255, 93, 108, 0.08)';
+    el.style.color = 'var(--danger)';
+    text.textContent = offline.length === 1
+      ? `Awaria bota: ${offline[0]}`
+      : `Awaria botów: ${offline.join(', ')}`;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   av_initBotStatus();
+  av_initHeroStatusBadge();
   // Odśwież status co 60 sekund, jeśli użytkownik zostanie na stronie.
   setInterval(av_initBotStatus, 60000);
+  setInterval(av_initHeroStatusBadge, 60000);
 });
