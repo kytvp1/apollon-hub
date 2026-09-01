@@ -1,6 +1,18 @@
 /*
   Koło Fortuny z okazji 3. urodzin Apollon Hub — losowanie kodu rabatowego.
 
+  WAŻNE — losowanie i limit "jedno konto / jeden adres IP" dzieją się TERAZ
+  PO STRONIE BOTA (tego samego, co obsługuje licencje), nie w przeglądarce.
+  Dzięki temu nie da się zakręcić drugi raz czyszcząc dane przeglądarki albo
+  wchodząc w tryb incognito — bot pamięta zarówno konto Discord, jak i adres IP,
+  z którego padło zakręcenie. Koło wymaga też zalogowania kontem Discord —
+  bez tego przycisk "Zakręć kołem" jest niedostępny.
+
+  Wymaga to zaktualizowanego bota (patrz: aktualizacja src/db.js i src/server.js —
+  nowy endpoint POST /api/wheel-spin) oraz poprawnie skonfigurowanego adresu
+  poniżej (AV_WHEEL_API_BASE) — to ten sam adres, co AV_LICENSE_API_BASE
+  w assets/licenses.js.
+
   KONFIGURACJA:
 
   AV_BIRTHDAY.enabled — true/false, włącza lub wyłącza całą niespodziankę.
@@ -8,29 +20,31 @@
                          (format: 'RRRR-MM-DDTGG:MM:SS'). Po tej dacie koło
                          i dymek przestają się automatycznie pokazywać.
 
-  AV_WHEEL_PRIZES — nagrody na kole. Każda ma:
+  AV_WHEEL_PRIZES — nagrody na kole, WYŁĄCZNIE do rysowania i podpisów.
     label     — krótki tekst widoczny NA kole (np. '-20%')
-    discount  — wysokość zniżki w % (0 = brak wygranej)
-    weight    — "waga" szansy na trafienie (im większa liczba względem innych,
-                tym większy kawałek koła i większa szansa na wylosowanie).
-                Suma wag nie musi wynosić 100 — jest przeliczana automatycznie.
+    discount  — wysokość zniżki w % (0 = brak wygranej) — MUSI mieć taką samą
+                wartość jak w tabeli WHEEL_PRIZES w src/server.js bota, bo po
+                tym polu strona rozpoznaje, na który kawałek koła "trafić"
+                wizualnie po odpowiedzi z serwera.
+    weight    — tylko wygląd kawałka koła (jak duży kawałek); FAKTYCZNE
+                losowanie i jego wagi są w src/server.js bota.
     color / textColor — kolory kawałka koła i jego napisu
     resultTitle / resultDesc — tekst pokazywany PO zakręceniu, gdy padnie ta nagroda
 
-  Kod rabatowy generowany po wygranej zapisuje się w przeglądarce użytkownika
-  (localStorage) i jest widoczny na stronie "Wydarzenia" w sekcji
-  "Twoje kody rabatowe" — nie ma go nigdzie indziej (nie jest wysyłany
-  automatycznie na serwer), więc klient powinien pokazać go zespołowi na
-  Discordzie przy składaniu zamówienia.
-
-  Każda przeglądarka może zakręcić kołem TYLKO RAZ — to zapisane jest lokalnie
-  (localStorage), żeby nie dało się losować w nieskończoność.
+  Kod rabatowy wygenerowany przez bota po wygranej zapisuje się dodatkowo
+  w przeglądarce użytkownika (localStorage), żeby był wygodnie widoczny na
+  stronie "Wydarzenia" w sekcji "Twoje kody rabatowe" — ale to bot jest
+  jedynym prawdziwym źródłem prawdy o tym, kto już zakręcił.
 */
 
 const AV_BIRTHDAY = {
   enabled: true,
-  endsAt: '2026-09-07T23:59:59',
+  endsAt: '2026-09-08T23:59:59',
 };
+
+// Ten sam adres, co AV_LICENSE_API_BASE w assets/licenses.js (celowo osobna stała,
+// żeby uniknąć konfliktu nazw na stronach, które wczytują oba pliki naraz).
+const AV_WHEEL_API_BASE = 'https://xms87hmsab.apps.bot-hosting.cloud';
 
 const AV_WHEEL_PRIZES = [
   {
@@ -214,22 +228,7 @@ function av_copyText(text, btnEl) {
   }
 }
 
-function av_generateCode(prize) {
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `URODZINY-${prize.discount}-${rand}`;
-}
-
-// ===== Rysowanie i losowanie koła =====
-
-function av_pickWeightedPrizeIndex() {
-  const total = AV_WHEEL_PRIZES.reduce((s, p) => s + p.weight, 0);
-  let r = Math.random() * total;
-  for (let i = 0; i < AV_WHEEL_PRIZES.length; i++) {
-    r -= AV_WHEEL_PRIZES[i].weight;
-    if (r <= 0) return i;
-  }
-  return AV_WHEEL_PRIZES.length - 1;
-}
+// ===== Rysowanie koła (samo losowanie robi teraz bot — patrz av_handleSpin) =====
 
 function av_drawWheel(canvas) {
   const ctx = canvas.getContext('2d');
@@ -308,17 +307,25 @@ function av_spinWheelTo(canvas, prizeIndex, onDone) {
 // ===== Budowanie treści dymka =====
 
 function av_wheelModalHtml() {
+  const user = av_getDiscordUser();
+  const loggedIn = !!(user && user.id);
+
   return `
     <button class="birthday-close" aria-label="Zamknij">×</button>
     <div class="wheel-eyebrow">3. urodziny Apollon Hub</div>
     <h3>Zakręć kołem urodzinowym!</h3>
-    <p class="wheel-sub">Jedna szansa na kod rabatowy w tej przeglądarce. Tydzień urodzinowy kończy się za: <strong data-birthday-countdown>--:--:--</strong></p>
+    <p class="wheel-sub">Jedno zakręcenie na konto Discord (i jeden adres IP). Tydzień urodzinowy kończy się za: <strong data-birthday-countdown>--:--:--</strong></p>
     <div class="wheel-wrap">
       <div class="wheel-pointer"></div>
       <canvas id="birthdayWheelCanvas" width="240" height="240" class="wheel-canvas"></canvas>
     </div>
-    <button class="btn btn-primary wheel-spin-btn" id="wheelSpinBtn">Zakręć kołem</button>
+    ${loggedIn
+      ? `<button class="btn btn-primary wheel-spin-btn" id="wheelSpinBtn">Zakręć kołem</button>`
+      : `<a href="konto.html" class="btn btn-primary wheel-spin-btn">Zaloguj się przez Discord, żeby zakręcić →</a>
+         <p class="wheel-sub" style="margin:10px 0 0;">Koło jest dostępne tylko dla zalogowanych kontem Discord.</p>`
+    }
     <div class="wheel-result" id="wheelResult" hidden></div>
+    <div class="status-msg" id="wheelMsg"></div>
   `;
 }
 
@@ -327,38 +334,81 @@ function av_alreadySpunModalHtml() {
     <button class="birthday-close" aria-label="Zamknij">×</button>
     <div class="wheel-eyebrow">3. urodziny Apollon Hub</div>
     <h3>Koło zakręcone — Twój kod czeka</h3>
-    <p>To koło da się zakręcić tylko raz na przeglądarkę — Twój kod rabatowy znajdziesz w zakładce Wydarzenia.</p>
+    <p>To konto Discord (albo ten adres IP) już zakręciło kołem — Twój kod rabatowy znajdziesz w zakładce Wydarzenia.</p>
     <p class="wheel-sub">Tydzień urodzinowy kończy się za: <strong data-birthday-countdown>--:--:--</strong></p>
     <a href="wydarzenia.html" class="btn btn-primary birthday-cta">Zobacz mój kod →</a>
   `;
 }
 
-function av_handleSpin(canvas, spinBtn, toast) {
+async function av_handleSpin(canvas, spinBtn, toast) {
   if (spinBtn.disabled) return;
-  spinBtn.disabled = true;
-  spinBtn.textContent = 'Kręcimy...';
 
-  const idx = av_pickWeightedPrizeIndex();
-  av_spinWheelTo(canvas, idx, () => {
-    const prize = AV_WHEEL_PRIZES[idx];
+  const user = av_getDiscordUser();
+  if (!user || !user.id) return; // przycisk nie powinien się w ogóle pojawić bez zalogowania — zabezpieczenie
+
+  spinBtn.disabled = true;
+  spinBtn.textContent = 'Sprawdzam...';
+  const msg = toast.querySelector('#wheelMsg');
+  if (msg) msg.className = 'status-msg';
+
+  let data;
+  try {
+    const res = await fetch(`${AV_WHEEL_API_BASE}/api/wheel-spin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ discordUserId: user.id }),
+    });
+    data = await res.json().catch(() => null);
+    if (!res.ok || !data || !data.ok) {
+      const reason = data && data.reason;
+      if (reason === 'already_spun') {
+        av_markSpun();
+        const resultBox = toast.querySelector('#wheelResult');
+        if (resultBox) {
+          resultBox.innerHTML = `
+            <div class="wheel-result-title">Koło już wykorzystane</div>
+            <p class="wheel-result-desc">To konto Discord (albo ten adres IP) już brało udział w losowaniu. Jeśli wygrałeś kod na innym urządzeniu, sprawdź go w zakładce Wydarzenia.</p>
+          `;
+          resultBox.hidden = false;
+        }
+        spinBtn.style.display = 'none';
+        return;
+      }
+      throw new Error(reason || 'request_failed');
+    }
+  } catch (err) {
+    spinBtn.disabled = false;
+    spinBtn.textContent = 'Zakręć kołem';
+    if (msg) {
+      msg.textContent = 'Nie udało się połączyć z serwerem. Spróbuj ponownie za chwilę.';
+      msg.className = 'status-msg err show';
+    }
+    return;
+  }
+
+  spinBtn.textContent = 'Kręcimy...';
+  const idx = AV_WHEEL_PRIZES.findIndex((p) => p.discount === data.discount);
+  const safeIdx = idx >= 0 ? idx : 0;
+
+  av_spinWheelTo(canvas, safeIdx, () => {
+    const prize = AV_WHEEL_PRIZES[safeIdx];
     av_markSpun();
     const resultBox = toast.querySelector('#wheelResult');
     if (!resultBox) return;
 
-    if (prize.discount > 0) {
-      const code = av_generateCode(prize);
-      av_saveWheelCode({ code, discount: prize.discount, wonAt: new Date().toISOString(), source: 'Koło Fortuny' });
-      av_launchConfetti(prize.discount >= 40 ? 2 : 1.3);
+    if (data.discount > 0 && data.code) {
+      av_saveWheelCode({ code: data.code, discount: data.discount, wonAt: new Date().toISOString(), source: 'Koło Fortuny' });
+      av_launchConfetti(data.discount >= 40 ? 2 : 1.3);
       resultBox.innerHTML = `
         <div class="wheel-result-title">${prize.resultTitle}</div>
         <p class="wheel-result-desc">${prize.resultDesc}</p>
         <div class="wheel-code-box">
-          <span class="wheel-code">${code}</span>
+          <span class="wheel-code">${data.code}</span>
           <button class="btn btn-outline" id="wheelCopyBtn">Kopiuj</button>
         </div>
       `;
       const copyBtn = resultBox.querySelector('#wheelCopyBtn');
-      if (copyBtn) copyBtn.addEventListener('click', (e) => av_copyText(code, e.currentTarget));
+      if (copyBtn) copyBtn.addEventListener('click', (e) => av_copyText(data.code, e.currentTarget));
     } else {
       resultBox.innerHTML = `
         <div class="wheel-result-title">${prize.resultTitle}</div>

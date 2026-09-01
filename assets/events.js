@@ -23,27 +23,27 @@
 const AV_EVENTS = [
   {
     title: 'Koło Fortuny — wygraj do -40%',
-    desc: 'Zakręć raz kołem fortuny na stronie głównej i sprawdź, jaki kod rabatowy wylosujesz. Jedna szansa na przeglądarkę — wygrany kod trafia od razu do sekcji "Twoje kody rabatowe" powyżej.',
-    period: '1–7 września',
+    desc: 'Zakręć kołem fortuny na stronie głównej i sprawdź, jaki kod rabatowy wylosujesz. Wymaga zalogowania kontem Discord — jedno zakręcenie na konto. Wygrany kod trafia od razu do sekcji "Twoje kody rabatowe" powyżej.',
+    period: '1–8 września',
     badge: 'Flagowe wydarzenie',
     featured: true,
   },
   {
     title: 'Loteria urodzinowa',
     desc: 'Co drugi dzień losujemy jedną osobę z serwera Discord, która otrzymuje dowolną licencję za darmo. Wystarczy być na serwerze w dniu losowania.',
-    period: '1–7 września',
+    period: '1–8 września',
     badge: 'Konkurs',
   },
   {
     title: 'Kod -30% na wszystko',
     desc: 'Użyj kodu URODZINY3 przy zamawianiu, żeby otrzymać 30% zniżki na dowolny produkt z oferty.',
-    period: '1–7 września',
+    period: '1–8 września',
     badge: 'Rabat',
   },
   {
     title: 'Pokaż swoją grę',
     desc: 'Wrzuć na Discordzie zrzut ekranu lub klip z gry zbudowanej przy użyciu modeli albo skryptów Apollon Hub. Najciekawsze zgłoszenie wygrywa dowolny produkt za darmo i zostaje wyróżnione na serwerze.',
-    period: 'Zgłoszenia do 6 września',
+    period: 'Zgłoszenia do 7 września',
     badge: 'Konkurs twórczy',
   },
   {
