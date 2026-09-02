@@ -138,7 +138,8 @@
           <div class="legal-acc-body">
             <p>Do nakładania kar uprawnieni są wyłącznie członkowie oficjalnej administracji serwera. Katalog kar obejmuje: <strong>wyciszenie</strong> (czasowe odebranie możliwości pisania), <strong>blokadę / ban</strong> (usunięcie z serwera, podlega apelacji) oraz <strong>czarną listę / blacklistę</strong> (permanentny ban bez możliwości odwołania, obejmujący też zakaz korzystania z usług serwera).</p>
             <p>Tworzenie multikont w celu ominięcia kary jest zabronione — wykryte multikonta są trwale blokowane, a kara na koncie głównym może zostać wydłużona lub zmieniona na stałą. Administracja może nałożyć natychmiastowy permanentny ban przy rażących naruszeniach: próby oszustwa, kradzież własności, leakowanie, działanie na szkodę serwera.</p>
-            <p>Każdemu przysługuje prawo odwołania od kary w terminie 48 godzin, wyłącznie na dedykowanym serwerze apelacyjnym. Część banów jest wyłącznie apelacyjna za pośrednictwem wykupienia się.</p>
+            <p>Każdemu przysługuje prawo odwołania od kary w terminie 48 godzin, wyłącznie na dedykowanym serwerze apelacyjnym: <a href="https://discord.gg/PwuRqgdVNf" target="_blank" rel="noopener">discord.gg/PwuRqgdVNf</a>. Część banów jest wyłącznie apelacyjna za pośrednictwem wykupienia się.</p>
+            <p id="kary-licencja">W przypadku zablokowanej <strong>licencji</strong> (patrz też pkt. 03 — Licencja i prawa autorskie) obowiązują te same zasady: administracja podaje powód blokady oraz jej czas trwania (widoczne na stronie w zakładce „Moje licencje”), a odwołanie składa się wyłącznie na wskazanym wyżej serwerze apelacyjnym.</p>
           </div>
         </details>
 
@@ -218,6 +219,25 @@
       items.forEach(function (d) { d.open = anyClosed; });
       btn.textContent = anyClosed ? 'Zwiń wszystkie' : 'Rozwiń wszystkie';
     });
+  })();
+
+  // Wejście z linku typu regulamin.html#kary albo regulamin.html#kary-licencja (np. ze strony
+  // "Moje licencje" przy zablokowanej licencji) - domyślnie punkty regulaminu są zwinięte, więc
+  // samo skrolowanie do id nic by nie pokazało. Obsługuje dwa przypadki: hash wskazujący wprost
+  // na cały punkt (<details class="legal-acc" id="...">), albo hash wskazujący na konkretny
+  // akapit WEWNĄTRZ punktu (np. #kary-licencja) - wtedy otwieramy nadrzędny punkt i przewijamy
+  // dokładnie do tego akapitu, nie tylko do początku całej sekcji.
+  (function () {
+    var hash = window.location.hash.slice(1);
+    if (!hash) return;
+    var target = document.getElementById(hash);
+    if (!target) return;
+    var section = target.classList.contains('legal-acc') ? target : target.closest('.legal-acc');
+    if (!section) return;
+    section.open = true;
+    setTimeout(function () {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   })();
 </script>
 </body>

@@ -507,6 +507,39 @@ table.licenses th, table.licenses td {
 table.licenses th { color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
 table.licenses td.mono { font-family: 'Courier New', monospace; color: var(--accent-2); }
 
+/* ===== Szczegóły blokady licencji (zakładka "Moje licencje") ===== */
+tr.license-block-row td {
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.block-details {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: rgba(255, 93, 108, 0.08);
+  border: 1px solid rgba(255, 93, 108, 0.3);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.block-details-row { margin: 0 0 6px; color: var(--text); }
+.block-details-row:last-child { margin-bottom: 0; }
+.block-details-row strong { color: var(--danger); }
+.block-details a { color: var(--accent-2); font-weight: 700; }
+.block-details .btn-appeal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: #5865F2;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.block-details .btn-appeal:hover { background: #4752c4; transform: translateY(-1px); }
+
 /* ===== Discord powiązanie ===== */
 
 .discord-account {

@@ -25,6 +25,33 @@ const AV_STATUS_BADGE = {
   blocked: 'offline',
 };
 
+// Serwer Discord, na ktorym mozna zlozyc apelacje od blokady licencji (patrz regulamin.html#kary).
+const AV_APPEAL_DISCORD = 'https://discord.gg/PwuRqgdVNf';
+
+function av_formatBlockedUntil(iso) {
+  if (!iso) return 'Bezterminowo — do czasu rozpatrzenia apelacji';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return 'Bezterminowo — do czasu rozpatrzenia apelacji';
+  return `do ${d.toLocaleDateString('pl-PL')}`;
+}
+
+// Dodatkowy wiersz pod zablokowana licencja - za co, na ile, i jak zdjac blokade.
+function av_blockDetailsRowHtml(lic) {
+  return `
+    <tr class="license-block-row">
+      <td colspan="4">
+        <div class="block-details">
+          <p class="block-details-row"><strong>Powód blokady:</strong> ${lic.blockReason ? lic.blockReason : 'Nie podano — zapytaj administrację na Discordzie.'}</p>
+          <p class="block-details-row"><strong>Czas trwania blokady:</strong> ${av_formatBlockedUntil(lic.blockedUntil)}</p>
+          <p class="block-details-row">Dokładny zapis zasad: <a href="regulamin.html#kary-licencja">regulamin, pkt. 09 — Kary, blokady kont i blacklista (akapit o blokadzie licencji)</a>.</p>
+          <p class="block-details-row">Aby zdjąć blokadę, złóż apelację wyłącznie na dedykowanym serwerze apelacyjnym — kliknij poniżej:</p>
+          <a class="btn-appeal" href="${AV_APPEAL_DISCORD}" target="_blank" rel="noopener">Apelacja</a>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
 function av_licenseApiConfigured() {
   return !!AV_LICENSE_API_BASE && !AV_LICENSE_API_BASE.startsWith('WPISZ');
 }
@@ -59,7 +86,7 @@ function av_renderLicenses(licenses) {
   tbody.innerHTML = licenses.map((lic) => {
     const badge = AV_STATUS_BADGE[lic.status] || 'info';
     const label = AV_STATUS_LABELS[lic.status] || lic.status;
-    return `
+    const row = `
       <tr>
         <td>${lic.product}</td>
         <td class="mono">${lic.key}</td>
@@ -67,6 +94,7 @@ function av_renderLicenses(licenses) {
         <td>${lic.note ? lic.note : '—'}</td>
       </tr>
     `;
+    return lic.status === 'blocked' ? row + av_blockDetailsRowHtml(lic) : row;
   }).join('');
 }
 
