@@ -143,8 +143,36 @@ img { max-width: 100%; display: block; }
 .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.04); }
 .nav-links a.active { color: #06101f; background: var(--accent-2); }
 
-.nav-links a.nav-highlight { color: #06101f; background: var(--accent); font-weight: 800; }
+.nav-links a.nav-highlight { position: relative; color: #06101f; background: var(--accent); font-weight: 800; overflow: visible; }
 .nav-links a.nav-highlight:hover { background: var(--accent-2); color: #06101f; }
+
+/* Konfetti nad przyciskiem "3 Urodziny" - czysto dekoracyjne, nie blokuje kliknięcia. */
+.nav-confetti {
+  position: absolute;
+  inset: -10px 0 auto 0;
+  height: 0;
+  pointer-events: none;
+}
+.nav-confetti-piece {
+  position: absolute;
+  top: -6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  opacity: 0;
+  animation-name: av-nav-confetti-fall;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+@keyframes av-nav-confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(22px) rotate(var(--rot, 180deg)); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-confetti-piece { animation: none; opacity: 0; }
+}
 
 .burger {
   display: none;

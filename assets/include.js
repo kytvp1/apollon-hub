@@ -57,6 +57,42 @@ function av_afterIncludeReady() {
 
   // Baner o plikach cookie / localStorage (niezbędne, techniczne)
   av_initCookieBanner();
+
+  // Konfetti na przycisku "3 Urodziny" w nawigacji
+  av_initNavHighlightConfetti();
+}
+
+// ===== Konfetti na przycisku nawigacji (.nav-highlight, np. "3 Urodziny") =====
+
+function av_initNavHighlightConfetti() {
+  const AV_CONFETTI_COLORS = ['#ffd166', '#ff6b8b', '#5b8bf0', '#3ddc97', '#c77dff', '#ffffff'];
+
+  document.querySelectorAll('.nav-highlight').forEach((btn) => {
+    if (btn.querySelector('.nav-confetti')) return; // już dodane
+
+    const wrap = document.createElement('span');
+    wrap.className = 'nav-confetti';
+    wrap.setAttribute('aria-hidden', 'true');
+
+    const pieceCount = 9;
+    for (let i = 0; i < pieceCount; i++) {
+      const piece = document.createElement('i');
+      piece.className = 'nav-confetti-piece';
+      const left = Math.round(Math.random() * 100);
+      const delay = (Math.random() * 2.4).toFixed(2);
+      const duration = (1.8 + Math.random() * 1.4).toFixed(2);
+      const color = AV_CONFETTI_COLORS[i % AV_CONFETTI_COLORS.length];
+      const rotate = Math.round(Math.random() * 360);
+      piece.style.left = left + '%';
+      piece.style.background = color;
+      piece.style.animationDelay = delay + 's';
+      piece.style.animationDuration = duration + 's';
+      piece.style.setProperty('--rot', rotate + 'deg');
+      wrap.appendChild(piece);
+    }
+
+    btn.appendChild(wrap);
+  });
 }
 
 // ===== Baner cookie (informacja o niezbędnych plikach cookie / localStorage) =====
