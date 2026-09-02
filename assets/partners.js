@@ -18,8 +18,8 @@
 const AV_PARTNERS = [
   { image: 'assets/partners/partner-1.png', link: null, label: 'Miejsce na logo' },
   { image: 'assets/partners/partner-2.png', link: null, label: 'Miejsce na logo' },
-  { image: null, link: null, label: 'Miejsce na logo' },
-  { image: null, link: null, label: 'Miejsce na logo' },
+  { image: 'assets/partners/partner-3.png', link: null, label: 'Miejsce na logo' },
+  { image: 'assets/partners/partner-4.png', link: null, label: 'Miejsce na logo' },
 ];
 
 function av_renderPartners() {
